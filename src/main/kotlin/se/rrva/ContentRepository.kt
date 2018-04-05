@@ -9,9 +9,9 @@ class ContentRepository {
         return listOf(listOf(PromotedItem("123", "foo-123", "Foo", "Lorem ipsum", "Lorem ipsum dolor sit amet")))
     }
 
-    fun myContent(): MyContent {
+    fun myContent(n : Int?): MyContent {
 
-        return MyContent(all = (1..100).map { i ->
+        return MyContent(all = (1..(n?:10)).map { i ->
             TvSeries(i.toString(), "Series $i", listOf(
                 Genre(
                     "drama",
@@ -25,7 +25,7 @@ class ContentRepository {
                                 "drama",
                                 "Drama"
                             )
-                        )
+                        ), false, episodeNo % 2 == 0
                     )
                 })
             })

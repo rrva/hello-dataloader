@@ -18,6 +18,6 @@ class RecommendedDataFetcher(
 
 class MyContentDataFetcher(private val repository: ContentRepository) : DataFetcher<MyContent> {
     override fun get(env: DataFetchingEnvironment): MyContent {
-        return repository.myContent()
+        return repository.myContent(env.getArgument("n"))
     }
 }

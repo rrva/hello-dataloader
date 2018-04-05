@@ -23,7 +23,9 @@ data class Season(
 data class Episode(
     override val id: String,
     override val name: String,
-    val genres: List<Genre>
+    val genres: List<Genre>,
+    val scary : Boolean,
+    val boring : Boolean
 ) : Thing
 
 data class PromotedItem(

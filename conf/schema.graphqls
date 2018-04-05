@@ -29,6 +29,8 @@ type Episode implements PromotedContent {
     tvSeries: TvSeries
     name: String!
     genres: [Genre!]!
+    scary: Boolean,
+    boring: Boolean
 }
 
 type Genre {
@@ -52,7 +54,7 @@ interface PromotedContent {
 }
 
 type Query {
-    myContent: MyContent!
+    myContent(n : Int): MyContent!
 }
 
 type MyContent {
