@@ -14,6 +14,7 @@ import graphql.execution.preparsed.PreparsedDocumentEntry
 import graphql.schema.idl.SchemaGenerator
 import graphql.schema.idl.SchemaParser
 import org.dataloader.DataLoaderRegistry
+import org.jooby.AsyncMapper
 import org.jooby.handlers.CorsHandler
 import org.jooby.json.Jackson
 import org.jooby.run
@@ -39,6 +40,7 @@ object App {
         run(*args) {
             use(Jackson(om))
             use("*", CorsHandler())
+            map(AsyncMapper())
 
             var repository: ContentRepository?
             var graphQl: GraphQL? = null
