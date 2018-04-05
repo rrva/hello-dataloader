@@ -6,7 +6,7 @@ import javax.inject.Singleton
 @Singleton
 class ContentRepository {
     fun promotedByGenres(genres: List<Genre>): List<List<PromotedItem>>? {
-        return emptyList()
+        return listOf(listOf(PromotedItem("123", "foo-123", "Foo", "Lorem ipsum", "Lorem ipsum dolor sit amet")))
     }
 
     fun myContent(): MyContent {
