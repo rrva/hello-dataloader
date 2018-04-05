@@ -22,7 +22,6 @@ data class Season(
 
 data class Episode(
     override val id: String,
-    val tvSeries: TvSeries,
     override val name: String,
     val genres: List<Genre>
 ) : Thing
