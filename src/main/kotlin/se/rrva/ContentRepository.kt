@@ -5,13 +5,16 @@ import javax.inject.Singleton
 
 @Singleton
 class ContentRepository {
-    fun promotedByGenres(genres: List<Genre>): List<List<PromotedItem>>? {
-        return listOf(listOf(PromotedItem("123", "foo-123", "Foo", "Lorem ipsum", "Lorem ipsum dolor sit amet")))
-    }
+
+
 
     fun myContent(n : Int?): MyContent {
 
-        return MyContent(all = (1..(n?:10)).map { i ->
+        return MyContent(all = createContent(n))
+    }
+
+    private fun createContent(n: Int?): List<TvSeries> {
+        return (1..(n ?: 10)).map { i ->
             TvSeries(i.toString(), "Series $i", listOf(
                 Genre(
                     "drama",
@@ -29,7 +32,19 @@ class ContentRepository {
                     )
                 })
             })
-        })
+        }
     }
+
+    fun contentByGenre(genre: Genre): List<TvSeries> {
+        return createContent(10)
+    }
+
+    fun recommendedByGenre(n:Int): List<PromotedItem> {
+        return (1..(n ?: 10)).map { i ->
+            PromotedItem(i.toString(), "Item $i", "Lorem ipsum", "Lorem ipsum dolor sit amet")
+        }
+    }
+
+
 
 }

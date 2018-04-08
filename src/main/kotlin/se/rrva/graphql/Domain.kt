@@ -7,12 +7,6 @@ data class TvSeries(
     var seasons: List<Season>
 ) : Thing
 
-data class Movie(
-    override val id: String,
-    override val name: String,
-    val genres: List<Genre>
-) : Thing
-
 data class Season(
     val id: String,
     val name: String,
@@ -29,21 +23,22 @@ data class Episode(
 ) : Thing
 
 data class PromotedItem(
-    val id: String,
-    val slug: String?,
-    val name: String?,
-    val byline: String?,
-    val description: String?
-)
+    override val id: String,
+    override val name: String,
+    val byline: String,
+    val description: String
+) : Thing
+
 
 data class MyContent(
-    val all: List<Any>
+    val all: List<TvSeries>
 )
 
 interface Thing {
     val id: String
     val name: String
 }
+
 
 data class Genre(
     val id: String,

@@ -1,65 +1,42 @@
-package se.rrva.graphql
-
-import graphql.TypeResolutionEnvironment
-import graphql.schema.GraphQLObjectType
-import graphql.schema.TypeResolver
-import graphql.schema.idl.RuntimeWiring
-import org.dataloader.DataLoader
+import com.coxautodev.graphql.tools.GraphQLQueryResolver
+import com.coxautodev.graphql.tools.GraphQLResolver
+import com.github.benmanes.caffeine.cache.Cache
+import graphql.GraphQL
+import graphql.execution.preparsed.PreparsedDocumentEntry
 import se.rrva.ContentRepository
-import java.io.BufferedReader
-import java.io.FileNotFoundException
-import java.io.InputStreamReader
+import se.rrva.graphql.*
 
-internal fun loadSchema(filename: String): String {
-    return BufferedReader(
-        InputStreamReader(
-            object : Any() {}.javaClass.classLoader.getResourceAsStream(filename)
-                    ?: throw FileNotFoundException("classpath:$filename")
-        )
-    ).readText()
-}
-
-fun buildRuntimeWiring(
+fun createGraphQl(
     repository: ContentRepository,
-    recommendedBatchLoader: DataLoader<Genre, List<PromotedItem>>
-): RuntimeWiring {
-    return RuntimeWiring.newRuntimeWiring()
-        .type("Query", { wiring ->
-            wiring.dataFetcher("myContent", MyContentDataFetcher(repository))
-        })
-        .type("Genre", { wiring ->
-            wiring.dataFetcher("recommended", RecommendedDataFetcher(repository, recommendedBatchLoader))
+    preParsedQueryCache: Cache<String, PreparsedDocumentEntry>
+): GraphQL {
 
-        })
-        .type("Content", { wiring ->
-            wiring.typeResolver(ContentTypeResolver())
-        })
-        .type("PromotedContent", { wiring ->
-            wiring.typeResolver(PromotedContentTypeResolver())
-        })
+    val schema = com.coxautodev.graphql.tools.SchemaParser.newParser().file("schema.graphqls")
+        .resolvers(
+            QueryResolver(repository),
+            GenreResolver(repository)
+        )
         .build()
+
+    return GraphQL.newGraphQL(schema.makeExecutableSchema()).build()
 }
 
-class ContentTypeResolver : TypeResolver {
-    override fun getType(env: TypeResolutionEnvironment?): GraphQLObjectType {
-        val javaObject: Any? = env?.getObject()
-        return when (javaObject) {
-            is TvSeries -> env.schema.getType("TvSeries") as GraphQLObjectType
-            is Movie -> env.schema.getType("Movie") as GraphQLObjectType
-            else -> throw IllegalStateException("Unknown type")
-        }
-    }
+class QueryResolver(private val repo: ContentRepository) : GraphQLQueryResolver {
+    fun myContent(
+        n: Int?
+    ) = repo.myContent(n)
 }
 
-class PromotedContentTypeResolver : TypeResolver {
-    override fun getType(env: TypeResolutionEnvironment?): GraphQLObjectType {
-        val javaObject: Any? = env?.getObject()
-        return when (javaObject) {
-            is Episode -> env.schema.getType("Episode") as GraphQLObjectType
-            is Movie -> env.schema.getType("Movie") as GraphQLObjectType
+class GenreResolver(private val repo: ContentRepository) : GraphQLResolver<Genre> {
 
-            else -> throw IllegalStateException("Unknown type: $javaObject")
 
-        }
+    fun content(genre: Genre): List<TvSeries> {
+        return repo.contentByGenre(genre)
     }
+
+    fun recommended(genre: Genre): List<PromotedItem> {
+        return repo.recommendedByGenre(10)
+    }
+
+
 }

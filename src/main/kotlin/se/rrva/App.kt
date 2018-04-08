@@ -7,22 +7,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import createGraphQl
 import graphql.ExecutionInput
 import graphql.GraphQL
-import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation
 import graphql.execution.preparsed.PreparsedDocumentEntry
-import graphql.schema.idl.SchemaGenerator
-import graphql.schema.idl.SchemaParser
-import org.dataloader.DataLoaderRegistry
 import org.jooby.AsyncMapper
 import org.jooby.handlers.CorsHandler
 import org.jooby.json.Jackson
 import org.jooby.run
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import se.rrva.graphql.buildRuntimeWiring
-import se.rrva.graphql.loadSchema
-import se.rrva.graphql.recommendedDataLoader
 
 object App {
 
@@ -83,28 +77,4 @@ data class GraphRequest(
     val query: String,
     val variables: Map<String, Any>?
 )
-
-fun createGraphQl(
-    repository: ContentRepository,
-    preParsedQueryCache: Cache<String, PreparsedDocumentEntry>
-): GraphQL {
-
-    val schemaParser = SchemaParser()
-    val schemaGenerator = SchemaGenerator()
-    val schemaString = loadSchema("schema.graphqls")
-    val typeRegistry = schemaParser.parse(schemaString)
-
-    val recommendedBatchLoader = recommendedDataLoader(repository)
-    val wiring = buildRuntimeWiring(repository, recommendedBatchLoader)
-
-    val graphQLSchema = schemaGenerator.makeExecutableSchema(typeRegistry, wiring)
-
-    val registry = DataLoaderRegistry()
-    registry.register("recommended", recommendedBatchLoader)
-    val dispatcherInstrumentation = DataLoaderDispatcherInstrumentation(registry)
-
-    return GraphQL.newGraphQL(graphQLSchema).instrumentation(dispatcherInstrumentation)
-        .preparsedDocumentProvider(preParsedQueryCache::get)
-        .build()
-}
 

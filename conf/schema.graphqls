@@ -1,21 +1,10 @@
-type TvSeries implements Content {
+type TvSeries {
     id: ID!
     name: String!
     genres: [Genre!]!
     seasons: [Season!]!
 }
 
-type Movie implements Content & PromotedContent {
-    id: ID!
-    name: String!
-    genres: [Genre!]!
-}
-
-interface Content {
-    id: ID!
-    name: String!
-    genres: [Genre!]!
-}
 
 type Season {
     id: ID!
@@ -24,9 +13,8 @@ type Season {
     episodes: [Episode!]!
 }
 
-type Episode implements PromotedContent {
+type Episode {
     id: ID!
-    tvSeries: TvSeries
     name: String!
     genres: [Genre!]!
     scary: Boolean,
@@ -36,27 +24,23 @@ type Episode implements PromotedContent {
 type Genre {
     id: ID!
     name: String!
-    content: [Content!]
-    recommended: [PromotedItem!]!
+    content: [TvSeries!]
+    recommended: [PromotedItem!]
 }
+
 
 type PromotedItem {
-    name: String!
-    byline: String
-    description: String
-    content: PromotedContent
-}
-
-interface PromotedContent {
     id: ID!
     name: String!
-    genres: [Genre!]!
+    byline: String!
+    description: String!
 }
+
 
 type Query {
     myContent(n : Int): MyContent!
 }
 
 type MyContent {
-    all: [Content!]!
+    all: [TvSeries!]!
 }
