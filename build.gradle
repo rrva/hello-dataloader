@@ -1,6 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.2.30'
     ext.joobyVersion = '1.2.3'
+    ext.graphiqlVersion = '0.11.11'
 
     repositories {
         mavenCentral()
@@ -13,8 +14,11 @@ buildscript {
 }
 
 plugins {
+    id "de.undercouch.download" version "3.2.0"
     id 'com.jonaslasauskas.capsule' version "0.3.0"
 }
+
+import de.undercouch.gradle.tasks.download.Download
 
 group 'se.rrva'
 version '1.0-SNAPSHOT'
@@ -99,12 +103,32 @@ task copyGraphqlSchema(type: Copy) {
 }
 
 
+task html(type: Copy) {
+    from 'src/templates'
+    into "public"
+    include 'graphiql.html.template'
+    rename { file -> 'graphiql.html' }
+    expand(es6promise: '4.0.5', fetch: '2.0.1', react: '15.4.2', graphiql: graphiqlVersion)
+}
+
+task downloadGraphiql(type: Download) {
+    src([
+            "https://github.com/graphql/graphiql/releases/download/v${graphiqlVersion}/graphiql.css",
+            "https://github.com/graphql/graphiql/releases/download/v${graphiqlVersion}/graphiql.js"
+    ])
+    dest "public"
+    overwrite false
+    onlyIfNewer true
+    quiet false
+}
+
 task copyExtra(type: Copy) {
     from 'bin'
     from 'config'
 
     into "$buildDir/libs"
 }
+
 
 task repackage(type: Exec, dependsOn: copyExtra){
     commandLine './gradlew', 'assemble'
@@ -115,4 +139,4 @@ task wrapper(type: Wrapper) {
 }
 
 
-processResources.dependsOn([copyGraphqlSchema])
+processResources.dependsOn([downloadGraphiql, html, copyGraphqlSchema, copyExtra])
